@@ -1,0 +1,38 @@
+# étape 1 : faire en sorte de synchroniser le code et le conteneur
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    depends_on: # permet de spécifier que le service db doit être démarré en premier
+      - db
+
+  db:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: blogcuisine
+      MYSQL_USER: user
+      MYSQL_PASSWORD: trustNo1
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./db-scripts:/docker-entrypoint-initdb.d # Script SQL pour l'initialisation
+    ports:
+      - "3306:3306"
+
+#optionnel : ajouter un service PMA
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "8081:80"
+    depends_on:
+      - db  
+
+volumes:
+  dbdata:
